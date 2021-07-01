@@ -1,12 +1,20 @@
 #include "Game.h"
 #include "Utils/Development/ConsoleOutput.h"
 #include <stdlib.h>
+#include "Scuff3dImGui/extensions.h"
+//#include "Scuff3dImGui/extensions.h"
 
 using namespace scuff3d;
 
 
-Game::Game() : Application::Application()
+Game::Game() : Application::Application(),
+	m_statusWindow(new Scuff3dImGuiWindow("status window", ImVec2(0,0),ImVec2(640,360)))
 {
+	m_input->setKeybind("Exit", VK_ESCAPE);
+	m_input->setKeybind("Forward", VK_KEY_W);
+	m_input->setKeybind("Back", VK_KEY_S);
+	m_input->setKeybind("Right", VK_KEY_D);
+	m_input->setKeybind("Left", VK_KEY_A);
 }
 
 Game::Game(HWND hwnd) : Application::Application() {
@@ -19,6 +27,7 @@ Game::Game(HINSTANCE hInstance, WNDPROC wndProc) : Game::Game()
 	int wy = m_basicSettings->readInt("window pos y", 300);
 
 	setWindow(new Window32(hInstance, wndProc, "Scuff3d Test Suite" ,glm::vec2(1280,720), glm::vec2(wx,wy)));
+	initRenderer(RenderingAPI::DX11);
 }
 
 Game::~Game() {
@@ -39,14 +48,15 @@ void Game::Frame() {
 	update();
 	postUpdate();
 
-	preFixedUpdate();
-	fixedUpdate();
-	postFixedUpdate();
+	if (preFixedUpdate()) {
+		fixedUpdate();
+		postFixedUpdate();
+	}
 
-	preRender();
-	render();
-	postRender();
-
+	if (preRender()) {
+		render();
+		present();
+	}
 
 	endFrame();
 }
@@ -54,21 +64,6 @@ void Game::Frame() {
 float Game::beginFrame() {
 	Application::beginFrame();
 
-	static float accSec = 0;
-	static float accHalfSec = 0;
-	accSec += m_dt;
-	accHalfSec += m_dt;
-
-	if (accHalfSec >= 0.5f) {
-		m_window->setWindowTitle("Scuff3d Test Suite " + std::to_string(1.0f/m_dt) + "fps");
-		accHalfSec = 0.0f;
-	}
-	if (accSec >= 1.0f) {
-		accSec = 0;
-		//m_window->getRect();
-	}
-	Application::endFrame();
-	//DEVLOG("GameBegin");
 	return m_dt;
 }
 
@@ -83,7 +78,7 @@ void Game::update()
 {
 	Application::update();
 
-	Sleep(DWORD(0.001f * 1000.f));
+	//Sleep(DWORD(0.001f * 1000.f));
 
 }
 
@@ -96,48 +91,65 @@ void Game::postUpdate()
 
 bool Game::preFixedUpdate()
 {
-	if (!Application::fixedUpdate())
+	if (!Application::preFixedUpdate())
 		return false;
 
 
 	return true;
 }
 
-bool Game::fixedUpdate()
+void Game::fixedUpdate()
 {
-	if (!Application::fixedUpdate())
-		return false;
+	Application::fixedUpdate();
 
-
-	return true;
 }
 
-bool Game::postFixedUpdate()
+void Game::postFixedUpdate()
 {
-	if (!Application::postFixedUpdate())
-		return false;
-
-
-	return true;
+	Application::postFixedUpdate();
 }
 
-void Game::preRender()
+bool Game::preRender()
 {
-	Application::preRender();
+	return Application::preRender();
 }
 
 void Game::render()
-{
-	Application::render();
+{	
+	//std::function<void()> imgui = std::bind(&Application::renderImguiObjects, this);
+	Application::render([&]() {
+		renderImGui();
+	});
 }
 
-void Game::postRender()
+void Game::present()
 {
-	Application::postRender();
+	Application::present();
 }
 
 
 
 void Game::endFrame() {
 	Application::endFrame();
+}
+
+void Game::renderImGui()
+{
+	static bool showDemo = true;
+	
+	ImGui::ShowDemoWindow(&showDemo);
+
+	m_statusWindow->render([&]() {renderStatus(); });
+
+}
+
+void Game::renderStatus()
+{
+	ImGui::Text(std::to_string(1.0f / m_dt) + " fps");
+
+	if(ImGui::BeginChild("keybinds")) {
+		m_input->renderImGuiContent();
+	}
+	ImGui::EndChild();
+	
 }

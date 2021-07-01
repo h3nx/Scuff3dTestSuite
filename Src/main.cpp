@@ -57,9 +57,7 @@ LRESULT CALLBACK mainWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		application->wndProc(hWnd, message, wParam, lParam);
 
 	switch (message) {
-	break;
 	case WM_DESTROY:
-		application->exit();
 		PostQuitMessage(0);
 		break;
 	default:

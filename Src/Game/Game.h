@@ -1,5 +1,7 @@
 #pragma once
 #include "Application.h"
+#include "Scuff3dImGui/Window/Scuff3dImGuiWindow.h"
+
 //#include "imgui/imgui.h"
 class Game :
 	public scuff3d::Application {
@@ -20,21 +22,26 @@ public:
 	void postUpdate();
 
 	bool preFixedUpdate();
-	bool fixedUpdate();
-	bool postFixedUpdate();
+	void fixedUpdate();
+	void postFixedUpdate();
 
-	void preRender();
+	bool preRender();
 	void render();
-	void postRender();
+	void present();
 
 	void endFrame();
 
 
 
+
+	void renderImGui();
+
+
+
 private:
 
-
-
+	std::unique_ptr<scuff3d::Scuff3dImGuiWindow> m_statusWindow;
+	void renderStatus();
 
 
 };
