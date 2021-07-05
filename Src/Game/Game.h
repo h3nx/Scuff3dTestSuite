@@ -1,6 +1,7 @@
 #pragma once
 #include "Application.h"
 #include "Scuff3dImGui/Window/Scuff3dImGuiWindow.h"
+#include "Rendering/API/Geometry/Transform.h"
 
 //#include "imgui/imgui.h"
 class Game :
@@ -42,6 +43,8 @@ private:
 
 	std::unique_ptr<scuff3d::Scuff3dImGuiWindow> m_statusWindow;
 	void renderStatus();
+
+	scuff3d::Transform temp;
 
 
 };

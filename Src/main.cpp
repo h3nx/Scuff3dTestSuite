@@ -53,8 +53,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 LRESULT CALLBACK mainWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 
-	if(application)
-		application->wndProc(hWnd, message, wParam, lParam);
+	if (application)
+		if (application->wndProc(hWnd, message, wParam, lParam) == 0)
+			return 0;
 
 	switch (message) {
 	case WM_DESTROY:
