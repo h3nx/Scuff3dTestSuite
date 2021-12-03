@@ -1,5 +1,6 @@
 #include "Game/Game.h"
 #include "Utils/Development/ConsoleOutput.h"
+#include "Utils/Development/Misc.h"
 #include "Settings/Settings.h"
 //#include <sysinfoapi.h>
 #include <memory>
@@ -11,15 +12,10 @@ Game* application;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 
+	logMemLeaks();
 #ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-	AllocConsole();
-	FILE* a;
-	freopen_s(&a, "CONIN$", "r", stdin);
-	freopen_s(&a, "CONOUT$", "w", stdout);
-	freopen_s(&a, "CONOUT$", "w", stderr);
-	//DEVLOG("console init : " + std::to_string((float)((end.QuadPart - start.QuadPart) * 1.0 / frequency.QuadPart)) + "s");
+
+	initConsole();
 #endif
 
 	application = new Game(hInstance, mainWindowProc);
@@ -27,26 +23,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return 1;
 	}
 
-	//DEVLOG("main application init : " + std::to_string((float)((end.QuadPart - start.QuadPart) * 1.0 / frequency.QuadPart)) + "s");
-
 	MSG msg = { 0 };
 	while (application->isRunning()) {
 
-		if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE)) {
+		while (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else {
-			application->Frame();
-		}
+		application->Frame();
 	}
 
 
 	delete application;
 
 #ifdef _DEBUG
-	system("pause");
-	FreeConsole();
+	releaseConsole(false);
+
 #endif
 	return 0;
 }
@@ -58,8 +50,15 @@ LRESULT CALLBACK mainWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			return 0;
 
 	switch (message) {
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		break;
+	case WM_MOVING:
+	case WM_SIZING:
+		if (application) {
+			application->Frame();
+		}
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

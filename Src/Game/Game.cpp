@@ -2,44 +2,20 @@
 #include "Utils/Development/ConsoleOutput.h"
 #include <stdlib.h>
 #include "Scuff3dImGui/extensions.h"
+#include "Scuff3dImGui/Widgets/RenderingAPIWidgets.h"
+#include "Scuff3dImGui/Widgets/GlmWidgets.h"
 //#include "Scuff3dImGui/extensions.h"
+#include "Scenes/MainMenu.h"
+#include "Utils/Helpers.h"
+
+#include "Scenes/TestScene.h"
 
 using namespace scuff3d;
 
 
-Game::Game() : Application::Application(),
-	m_statusWindow(new Scuff3dImGuiWindow("status window", ImVec2(0,0),ImVec2(640,360)))
+Game::Game() : Application::Application()
 {
 
-	m_input->setKeybind("MB_L", VK_LBUTTON);
-	m_input->setKeybind("MB_R", VK_RBUTTON);
-	m_input->setKeybind("MB_M", VK_MBUTTON);
-
-	m_input->setKeybind("Exit", VK_ESCAPE);
-	m_input->setKeybind("Forward", VK_KEY_W);
-	m_input->setKeybind("Back", VK_KEY_S);
-	m_input->setKeybind("Right", VK_KEY_D);
-	m_input->setKeybind("Left", VK_KEY_A);
-	m_input->setKeybind("Space", VK_SPACE);
-
-	m_input->addActionDown("Space", [&]() {DEVLOG("keybind \"event\""); });
-	m_input->addActionUp("Space", [&]() {DEVLOG("Pressing Space up"); });
-
-	m_input->addActionDown("Forward", [&]() {m_input->confineCursor(true); });
-	m_input->addActionUp("Forward", [&]() {m_input->confineCursor(false); });
-
-	m_input->addActionDown("Right", [&]() {m_input->hideCursor(true); });
-	m_input->addActionUp("Right", [&]() {m_input->hideCursor(false); });
-
-
-	m_input->addActionDown("Left", [&]() {m_input->lockCursor(true); });
-	m_input->addActionUp("Left", [&]() {m_input->lockCursor(false); });
-
-
-
-
-
-	m_input->removeActionUp("Space", 0);
 
 }
 
@@ -49,11 +25,62 @@ Game::Game(HWND hwnd) : Application::Application() {
 
 Game::Game(HINSTANCE hInstance, WNDPROC wndProc) : Game::Game()
 {
-	int wx = m_basicSettings->readInt("window pos x", 500);
-	int wy = m_basicSettings->readInt("window pos y", 300);
+	bool fullscreen = (bool)m_basicSettings->readInt("window fullscreen", 0);
+	if (fullscreen) {
 
-	setWindow(new Window32(hInstance, wndProc, "Scuff3d Test Suite" ,glm::vec2(1280,720), glm::vec2(wx,wy)));
+		createWindow(hInstance, wndProc, "scuff3d Test Suite");
+	}
+	else {
+		glm::ivec2 windowPos = {
+			m_basicSettings->readInt("window pos x", 500),
+			m_basicSettings->readInt("window pos y", 300)
+		};
+
+		glm::ivec2 windowSize = {
+			m_basicSettings->readInt("window size x", 1280),
+			m_basicSettings->readInt("window size y", 720)
+		};
+
+		bool maximised = (bool)m_basicSettings->readInt("window maximised", 0);
+
+		createWindow(hInstance, wndProc, "scuff3d Test Suite", windowSize, windowPos, maximised);
+	}
+	
+
 	initRenderer(RenderingAPI::DX11);
+	m_window->onClientResize("Resize viewport", 
+		[&](const glm::vec2& size) {
+			m_renderer->resizeRenderTarget(size);
+			m_renderer->resizeViewport("standard", size);
+			m_renderer->getMainCamera()->setAspectratio(size);
+		}
+	);
+
+	m_window->setKeybind("MB_L", VK_LBUTTON);
+	m_window->setKeybind("MB_R", VK_RBUTTON);
+	m_window->setKeybind("MB_M", VK_MBUTTON);
+
+	m_window->setKeybind("Exit", VK_ESCAPE);
+	m_window->setKeybind("Forward", VK_KEY_W);
+	m_window->setKeybind("Back", VK_KEY_S);
+	m_window->setKeybind("Right", VK_KEY_D);
+	m_window->setKeybind("Left", VK_KEY_A);
+	m_window->setKeybind("Space", VK_SPACE);
+	m_window->setKeybind("Down", VK_KEY_C);
+
+	m_window->setKeybind("k1", VK_KEY_1);
+	m_window->setKeybind("k2", VK_KEY_2);
+	m_window->setKeybind("k3", VK_KEY_3);
+	m_window->setKeybind("k4", VK_KEY_4);
+	m_window->setKeybind("k5", VK_KEY_5);
+	m_window->setKeybind("k6", VK_KEY_6);
+	m_window->setKeybind("k7", VK_KEY_7);
+	m_window->setKeybind("k8", VK_KEY_8);
+
+	loadScene(NEW TestScene());
+
+
+
 }
 
 Game::~Game() {
@@ -62,122 +89,63 @@ Game::~Game() {
 void Game::exit()
 {
 	DEVLOG("Exiting application");
-	glm::vec2 pos = m_window->getPosition();
+
+	
+
+	 // get stuff from placement instead
+
+
+	glm::ivec2 pos = m_window->getNormalPosition();
+	glm::ivec2 size = m_window->getNormalSize();
+	bool maximised = m_window->isMaximised();
+	bool fullscreen = m_window->isFullscreen();
 	m_basicSettings->write("window pos x", (int)pos.x);
 	m_basicSettings->write("window pos y", (int)pos.y);
+	m_basicSettings->write("window size x", (int)size.x);
+	m_basicSettings->write("window size y", (int)size.y);
+	m_basicSettings->write("window maximised", (int)maximised);
+	m_basicSettings->write("window fullscreen", (int)fullscreen);
 	Application::exit();
 }
 
-void Game::Frame() {
-	beginFrame();
-	preUpdate();
-	update();
-	postUpdate();
-
-	if (preFixedUpdate()) {
-		fixedUpdate();
-		postFixedUpdate();
-	}
-
-	if (preRender()) {
-		render();
-		present();
-	}
-
-	endFrame();
-}
-
-float Game::beginFrame() {
-	Application::beginFrame();
-
-	return m_dt;
-}
-
-void Game::preUpdate()
+void Game::Frame()
 {
-	Application::preUpdate();
-
-
+	Application::Frame([&]() {renderImGui(); });
 }
 
-void Game::update()
-{
-	Application::update();
-
-	//Sleep(DWORD(0.001f * 1000.f));
-
-}
-
-void Game::postUpdate()
-{
-	Application::postUpdate();
-
-
-}
-
-bool Game::preFixedUpdate()
-{
-	if (!Application::preFixedUpdate())
-		return false;
-
-
-	return true;
-}
-
-void Game::fixedUpdate()
-{
-	Application::fixedUpdate();
-
-}
-
-void Game::postFixedUpdate()
-{
-	Application::postFixedUpdate();
-}
-
-bool Game::preRender()
-{
-	return Application::preRender();
-}
-
-void Game::render()
-{	
-	//std::function<void()> imgui = std::bind(&Application::renderImguiObjects, this);
-	Application::render([&]() {
-		renderImGui();
-	});
-}
-
-void Game::present()
-{
-	Application::present();
-}
-
-
-
-void Game::endFrame() {
-	Application::endFrame();
-}
 
 void Game::renderImGui()
 {
 	static bool showDemo = true;
 	
-	ImGui::ShowDemoWindow(&showDemo);
+	::ImGui::ShowDemoWindow(&showDemo);
 	
-	m_statusWindow->render([&]() {renderStatus(); });
+	//m_statusWindow->render([&]() {renderStatus(); });
+	//m_devWindow->render([&]() {renderDev(); });
+
 
 }
 
 void Game::renderStatus()
 {
-	ImGui::Text(std::to_string(1.0f / m_dt) + " fps");
+	/*::ImGui::Text(std::to_string(1.0f / m_dt) + " fps");
 
 	
 
-	if(ImGui::BeginChild("keybinds")) {
+	if(::ImGui::BeginChild("keybinds")) {
 		m_input->renderImGuiContent();
 	}
-	ImGui::EndChild();
+	::ImGui::EndChild();*/
 	
 }
+
+void Game::renderDev() {
+
+	//scuff3dImGui::TransformDataEx(temp);
+	//scuff3dImGui::Mat4(temp.getMatrixWithUpdate());
+
+}
+
+
+
+
