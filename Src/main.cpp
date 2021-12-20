@@ -56,9 +56,9 @@ LRESULT CALLBACK mainWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		break;
 	case WM_MOVING:
 	case WM_SIZING:
-		if (application) {
+		/*if (application) {
 			application->Frame();
-		}
+		}*/
 		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);

@@ -55,6 +55,11 @@ Game::Game(HINSTANCE hInstance, WNDPROC wndProc) : Game::Game()
 			m_renderer->getMainCamera()->setAspectratio(size);
 		}
 	);
+	/*m_window->onClientResize("frame", 
+		[&](const glm::vec2& size) {
+			this->Frame();
+		}
+	);*/
 
 	m_window->setKeybind("MB_L", VK_LBUTTON);
 	m_window->setKeybind("MB_R", VK_RBUTTON);
