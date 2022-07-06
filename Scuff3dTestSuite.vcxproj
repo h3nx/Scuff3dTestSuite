@@ -158,11 +158,13 @@
     <ClCompile Include="Src\Game\Game.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Scenes\MainMenu.cpp" />
+    <ClCompile Include="Src\Scenes\SplashScreen.cpp" />
     <ClCompile Include="Src\Scenes\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Game\Game.h" />
     <ClInclude Include="Src\Scenes\MainMenu.h" />
+    <ClInclude Include="Src\Scenes\SplashScreen.h" />
     <ClInclude Include="Src\Scenes\TestScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

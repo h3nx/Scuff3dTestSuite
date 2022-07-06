@@ -9,6 +9,7 @@
 #include "Utils/Helpers.h"
 
 #include "Scenes/TestScene.h"
+#include "Scenes/SplashScreen.h"
 
 using namespace scuff3d;
 
@@ -82,7 +83,8 @@ Game::Game(HINSTANCE hInstance, WNDPROC wndProc) : Game::Game()
 	m_window->setKeybind("k7", VK_KEY_7);
 	m_window->setKeybind("k8", VK_KEY_8);
 
-	loadScene(NEW TestScene());
+	loadScene(NEW SplashScreen());
+	//loadScene(NEW TestScene());
 
 
 
