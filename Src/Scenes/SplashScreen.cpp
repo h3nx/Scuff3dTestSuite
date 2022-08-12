@@ -28,7 +28,9 @@ bool SplashScreen::init()
 
 	ModelData* modelDoc = renderer->createModel("Doc", rm->getMesh("Doc"), "VertexNormalColor", "PixelNormalColor");
 
-
+	createObject("potato test");
+	createObject("potato2 test");
+	createObject("potato3 test");
 
 
 
@@ -38,6 +40,12 @@ bool SplashScreen::init()
 
 
 	return true;
+}
+
+void SplashScreen::update(const float dt) {
+}
+
+void SplashScreen::render() {
 }
 
 
