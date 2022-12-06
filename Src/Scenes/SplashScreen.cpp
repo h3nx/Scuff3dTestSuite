@@ -12,6 +12,8 @@ bool SplashScreen::init()
 
 	rm->loadObj("CubeScuffed", "../Scuff3d/Resources/BasicModels/Cube.obj");
 	rm->addFile("Cube", "MeshFactory", Mesh::CreateCube());
+	rm->loadObj("Sphere", "../Scuff3d/Resources/BasicModels/Sphere.obj");
+
 
 	Renderer* renderer = m_app->getRenderer();
 	renderer->loadShader("VertexNormalColor", "../Scuff3d/Resources/DefaultShaders/VertexNormalColor.hlsl", SHADER_TYPE::VERTEX_SHADER);
@@ -27,6 +29,8 @@ bool SplashScreen::init()
 	ModelData* modelScuffed = renderer->createModel("CubeScuffed", rm->getMesh("CubeScuffed"), "VertexNormalColor", "PixelNormalColor");
 
 	ModelData* modelDoc = renderer->createModel("Doc", rm->getMesh("Doc"), "VertexNormalColor", "PixelNormalColor");
+
+	ModelData* sphere = renderer->createModel("Sphere", rm->getMesh("Sphere"), "VertexColor", "pixelColor");
 
 	createObject("potato test");
 	createObject("potato2 test");

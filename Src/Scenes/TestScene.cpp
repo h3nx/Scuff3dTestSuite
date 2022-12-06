@@ -48,8 +48,8 @@ bool TestScene::init() {
 	}
 
 
-	addSystem(new CameraControllerSystem());
-	addSystem(new BasicPhysicsSystem());
+	addSystem(NEW CameraControllerSystem());
+	addSystem(NEW BasicPhysicsSystem());
 
 	return true;
 }
